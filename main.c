@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "zh_CN.UTF-8");
     // 默认值
-    float F = 1500.0f; // 拉力
+    float F = 1700.0f; // 拉力
     float V = 1.0f;    // 速度
-    float D = 240.0f;  // 直径
+    float D = 220.0f;  // 直径
     if (argc == 4)
     {
         F = atof(argv[1]); // 拉力
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     float d_2 = m * Z2; // 大齿轮分度圆
     // 计算齿宽
     float b = φd * d1;
-    int16_t B2 = round_to_nearest((int16_t)b, 10); // 大齿轮宽度
+    int16_t B2 = round_to_nearest((int16_t)b, 5); // 大齿轮宽度
     int16_t B1 = B2 + 5;                           // 小齿轮宽度
     // 计算齿轮其它几何参数
     float h_a = m * 1; // 齿顶高，标准齿的ha*为1
@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
     printf("初次计算小齿轮直径D1: %.3f mm, 计算得模数为: %.2f, 最终模数为: %.2fmm\n", d1, m_1, m);
     printf("最终小齿轮分度圆：%.2f, 大齿轮分度圆: %.2f\n", d_1, d_2);
     printf("中心距a为: %.2f mm\n", a);
+    printf("通过公式b = φd * d1计算的齿宽为b: %.2f mm\n", b);
     printf("小齿轮齿宽B1: %d mm, 大齿轮齿宽B2: %d mm\n", B1, B2);
     printf("剩下的自己算吧\n");
 #endif
