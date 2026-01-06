@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "zh_CN.UTF-8");
     // 默认值
-    float F = 1700.0f; // 拉力
+    float F = 1500.0f; // 拉力
     float V = 1.0f;    // 速度
-    float D = 220.0f;  // 直径
+    float D = 240.0f;  // 直径
     if (argc == 4)
     {
         F = atof(argv[1]); // 拉力
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     // 计算齿宽
     float b = φd * d1;
     int16_t B2 = round_to_nearest((int16_t)b, 5); // 大齿轮宽度
-    int16_t B1 = B2 + 5;                           // 小齿轮宽度
+    int16_t B1 = B2 + 5;                          // 小齿轮宽度
     // 计算齿轮其它几何参数
     float h_a = m * 1; // 齿顶高，标准齿的ha*为1
     // // 计算接触疲劳强度用重合度系数Zε
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
     // 安装平键，所以加大5%
     float d = d0 * 1.05f;
     // 四舍五入最终选取
-    d = round_to_nearest(d, 10);
+    d = round(d);
     // 选用课本方案二, 取定位轴肩h=2mm
     const uint8_t h = 2;
     float d12 = d;
@@ -157,6 +157,7 @@ int main(int argc, char *argv[])
         d23 = 28;
     else if (d23 > 28 && d23 < 30)
         d23 = 30;
+    d23 = round(d23);
 
     float $d34 = d23 + 2 * h;
     float d34 = $d34;
@@ -166,7 +167,8 @@ int main(int argc, char *argv[])
         d34 = 30;
     else if ($d34 > 30 && $d34 < 40)
         d34 = 40;
-    float d45 = d34 + 2 * h;
+    d34 = round(d34);
+    float d45 = round(d34 + 2 * h);
     float d4 = d45;
     if (d4 > 31.5 && d4 < 33.5)
         d4 = 33.5;
@@ -174,16 +176,17 @@ int main(int argc, char *argv[])
         d4 = 35.5;
     else if (d4 > 35.5 && d4 < 37.5)
         d4 = 37.5;
+    d4 = round(d4);
 
     float d56 = d4 + 2 * h;
-    float d5 = d56;
+    float d5 = round(d56);
     if (d5 > 35.5 && d5 < 37.5)
         d5 = 37.5;
     else if (d5 > 37.5 && d5 < 40)
         d5 = 40;
     else if (d5 > 40 && d5 < 42.5)
         d5 = 42.5;
-    float d6 = d34;
+    float d6 = round(d34);
 
 #if DEBUG_FLG
     printf("五、轴的初步设计与校核\n");
@@ -211,6 +214,7 @@ int main(int argc, char *argv[])
     uint8_t n = a <= 250 ? 4 : 6;      // 地脚螺栓数目
     uint8_t d1_1 = 0.75 * d_f;         // 轴承旁连接螺栓直径
     uint8_t d3_3 = 0.45 * d_f;         // 轴承端盖螺钉直径
+    float m0_0 = round(0.85 * delta);         // 机座肋厚
     uint8_t e = 1.2 * d3_3;            // 轴承端盖凸缘厚度
     float Delta1 = round(1.2 * delta); // 大齿轮顶圆与内机壁距离，教材说大于1.2倍delta即可,我取10
     float Delta2 = 10;                 // 齿轮端面与内机壁距离,教材说大于delta同时一般取>=10
@@ -241,6 +245,7 @@ int main(int argc, char *argv[])
     printf("机座凸缘厚度b: %.3f mm, 机盖凸缘厚度b1: %.3f mm\n", b0, b1);
     printf("机座底凸缘厚度b2: %.3f mm\n", b2);
     printf("地脚螺栓直径df: %d mm, 地脚螺栓数目n: %d, 轴承旁连接螺栓直径d1:%d\n", d_f, n, d1_1);
+    printf("机座肋厚m0: %.3f mm\n", m0_0);
     printf("轴承端盖螺钉直径d3: %d mm, 轴承端盖凸缘厚度:e %d mm\n", d3_3, e);
     printf("大齿轮顶圆与内机壁距离△1: %.2f mm, 齿轮端面与内机壁距离△2: %.2f mm, 脂润滑△3为%d\n", Delta1, Delta2, Delta3);
     printf("df,d1,d2到外机壁距离c1: %dmm, df,d2到凸缘边缘距离c2: %dmm, D0: %dmm\n", c1, c2, D0);
@@ -257,7 +262,7 @@ int main(int argc, char *argv[])
     Bearing_Param_t bearing_High = get_bearing_param((int)d34);
 
     float L1 = W_V - 2;
-    float L2 = L_B + e + B - Delta3 - bearing_High.B;
+    float L2 = L_B + e + m0_0;
     float L3 = bearing_High.B + Delta3 + Delta2 + 3;
     float L4 = B1 - 3; // 用齿轮宽度减去2~3
     float L5 = 6;
