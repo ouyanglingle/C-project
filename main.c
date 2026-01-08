@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "zh_CN.UTF-8");
     // 默认值
-    float F = 1400.0f; // 拉力
+    float F = 1700.0f; // 拉力
     float V = 1.2f;    // 速度
     float D = 220.0f;  // 直径
     if (argc == 4)
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     const float Z_E = 188.9;              // 区域系数， 假装是课本的188.9
     const float cos20 = 0.9396926207859f; // Cos(20°)结果
     const float tan20 = 0.3639702342662f; // tan(20°)结果
-    const uint16_t Z1 = 18;               // 小齿轮齿数默认20
+    const uint16_t Z1 = 20;               // 小齿轮齿数默认20
     float Z2 = Z1 * i_1;                  // 大齿轮齿数
     //
     float d1 = 2.32f * pow((K_Ht * T_i / φd) * ((i_1 + 1) / i_1) * (Z_E / xigema_H2) * (Z_E / xigema_H2), 1.0f / 3.0f);
