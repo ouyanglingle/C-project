@@ -5,17 +5,13 @@
 #include "param.h"
 #include "stdint.h"
 
-#define PI 3.1415926535897932384626433832795f
-#define DEBUG_FLG 1
-#define INNER_I1 4.0f // 默认齿轮传动比为4，参数不合理改
-
 int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "zh_CN.UTF-8");
     // 默认值
-    float F = 1500.0f; // 拉力
-    float V = 1.0f;    // 速度
-    float D = 240.0f;  // 直径
+    float F = 1400.0f; // 拉力
+    float V = 1.2f;    // 速度
+    float D = 220.0f;  // 直径
     if (argc == 4)
     {
         F = atof(argv[1]); // 拉力
@@ -50,6 +46,7 @@ int main(int argc, char *argv[])
     printf("inta_a: %.3f\n", inta_a);
     printf("卷筒轴转速;: %.3f r/min\n", n_w);
     printf("电机型号: %s, 额定功率P_en: %.3f kW, 满载转速: %.3f r/min\n", motor.name, motor.P_en, motor.n_m);
+    printf("\n");
 #endif
     // ----分配传动比----
     // 总传动比i_a
@@ -81,12 +78,14 @@ int main(int argc, char *argv[])
     printf("高速轴参数 P_i: %.3f kW, n_i: %.3f r/min, T_i: %.3f N·mm\n", P_i, n_i, T_i);
     printf("低速轴参数 P_ii: %.3f kW, n_ii: %.3f r/min, T_ii: %.3f N·mm\n", P_ii, n_ii, T_ii);
     printf("卷筒轴参数 P_iii: %.3f kW, n_iii: %.3f r/min, T_iii: %.3f N·mm\n", P_iii, n_iii, T_iii);
+    printf("\n");
 #endif
     // ---- V带设计 ----
     // 大带轮宽度
 #if DEBUG_FLG
     printf("三、V带设计\n");
     printf("大带轮宽度: 50 mm\n");
+    printf("\n");
 #endif
 
     // ---- 齿轮设计 要灵活变通懂么 表满看起来没问题就行了 再深入就不礼貌了----
@@ -100,7 +99,7 @@ int main(int argc, char *argv[])
     const float Z_E = 188.9;              // 区域系数， 假装是课本的188.9
     const float cos20 = 0.9396926207859f; // Cos(20°)结果
     const float tan20 = 0.3639702342662f; // tan(20°)结果
-    const uint16_t Z1 = 20;               // 小齿轮齿数默认20
+    const uint16_t Z1 = 18;               // 小齿轮齿数默认20
     float Z2 = Z1 * i_1;                  // 大齿轮齿数
     //
     float d1 = 2.32f * pow((K_Ht * T_i / φd) * ((i_1 + 1) / i_1) * (Z_E / xigema_H2) * (Z_E / xigema_H2), 1.0f / 3.0f);
@@ -130,14 +129,16 @@ int main(int argc, char *argv[])
 #if DEBUG_FLG
     printf("四、齿轮设计\n");
     printf("小齿轮40MnB调质, 大齿轮ZG35SiMn调质\n");
-    printf("小齿轮齿数默认20,\n");
+    printf("小齿轮齿数默认 %d,\n", Z1);
     printf("初次计算小齿轮直径D1: %.3f mm, 计算得模数为: %.2f, 最终模数为: %.2fmm\n", d1, m_1, m);
     printf("最终小齿轮分度圆：%.2f, 大齿轮分度圆: %.2f\n", d_1, d_2);
     printf("中心距a为: %.2f mm\n", a);
     printf("通过公式b = φd * d1计算的齿宽为b: %.2f mm\n", b);
     printf("小齿轮齿宽B1: %d mm, 大齿轮齿宽B2: %d mm\n", B1, B2);
     printf("剩下的自己算吧\n");
+    printf("\n");
 #endif
+    bending_fatigue_strength_check(T_i, K_Ht, B2, m, n_i, Z1); // 齿根弯曲疲劳强度校核
 
     // ---- 轴的设计与校核 ----
     // 选用45调质材料，假装按照课本算到危险截面的当量弯矩Me
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
     // 安装平键，所以加大5%
     float d = d0 * 1.05f;
     // 四舍五入最终选取
-    d = round(d);
+    d = round_to_nearest(d, 2);
     // 选用课本方案二, 取定位轴肩h=2mm
     const uint8_t h = 2;
     float d12 = d;
@@ -161,12 +162,10 @@ int main(int argc, char *argv[])
 
     float $d34 = d23 + 2 * h;
     float d34 = $d34;
-    if ($d34 > d23 && $d34 < 28)
-        d34 = 28;
-    else if ($d34 < 30) // 教材表5.2
+    if ($d34 < 30)
         d34 = 30;
-    else if ($d34 > 30 && $d34 < 40)
-        d34 = 40;
+    else if ($d34 > 30 && $d34 < 35)
+        d34 = 35;
     d34 = round(d34);
     float d45 = round(d34 + 2 * h);
     float d4 = d45;
@@ -199,6 +198,7 @@ int main(int argc, char *argv[])
     printf("轴的直径d4: %.2f mm\n", d4);
     printf("轴的直径d5: %.2f mm\n", d5);
     printf("轴的直径d6: %.2f mm\n", d6);
+    printf("\n");
 #endif
     // ----箱体设计----
     // 机座壁厚
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
     uint8_t n = a <= 250 ? 4 : 6;      // 地脚螺栓数目
     uint8_t d1_1 = 0.75 * d_f;         // 轴承旁连接螺栓直径
     uint8_t d3_3 = 0.45 * d_f;         // 轴承端盖螺钉直径
-    float m0_0 = round(0.85 * delta);         // 机座肋厚
+    float m0_0 = 0.85 * delta;         // 机座肋厚
     uint8_t e = 1.2 * d3_3;            // 轴承端盖凸缘厚度
     float Delta1 = round(1.2 * delta); // 大齿轮顶圆与内机壁距离，教材说大于1.2倍delta即可,我取10
     float Delta2 = 10;                 // 齿轮端面与内机壁距离,教材说大于delta同时一般取>=10
@@ -250,6 +250,7 @@ int main(int argc, char *argv[])
     printf("大齿轮顶圆与内机壁距离△1: %.2f mm, 齿轮端面与内机壁距离△2: %.2f mm, 脂润滑△3为%d\n", Delta1, Delta2, Delta3);
     printf("df,d1,d2到外机壁距离c1: %dmm, df,d2到凸缘边缘距离c2: %dmm, D0: %dmm\n", c1, c2, D0);
     printf("轴承座宽度尺寸B: %d mm\n", B);
+    printf("\n");
 #endif
     // ----高速轴长度设计----
     const uint8_t L_B = 25; // 讲义的图上有25mm
@@ -262,7 +263,12 @@ int main(int argc, char *argv[])
     Bearing_Param_t bearing_High = get_bearing_param((int)d34);
 
     float L1 = W_V - 2;
-    float L2 = L_B + e + m0_0;
+    float L2_0 = L_B + e + m0_0;
+    float L2 = L2_0;
+    if (round(L2_0) < L2_0)
+        L2 = round(L2_0) + 1;
+    else
+        L2 = round(L2_0);
     float L3 = bearing_High.B + Delta3 + Delta2 + 3;
     float L4 = B1 - 3; // 用齿轮宽度减去2~3
     float L5 = 6;
@@ -279,6 +285,53 @@ int main(int argc, char *argv[])
     printf("第四段长L4: %.2f\n", L4);
     printf("第五段长L5和轴环宽度相等: %.2f\n", L5);
     printf("第六段长L6: %.2f\n", L6);
+    printf("\n");
+#endif
+    // ----低速轴直径设计----
+    const float h_L = 1.5;
+    float d0_L0 = A0 * pow(P_ii / n_ii, 1.0f / 3.0f);
+    uint8_t d0_L = round_to_nearest(d0_L0, 2);
+    uint8_t d12_L = d0_L;
+    uint8_t d23_L = 0;
+    float d23_L0 = d12_L + 2 * h_L;
+    if (d23_L0 > d12_L && d23_L0 < 37.5) // 教材表5.2
+        d23_L = round_to_nearest(d23_L0, 2);
+
+    uint8_t d34_L, d34_L0;
+    d34_L0 = d23_L + 2 * h_L;
+    if (d34_L0 > 30 && d34_L0 <= 35)
+        d34_L = 35;
+    else if (d34_L0 > 35 && d34_L0 <= 40)
+        d34_L = 40;
+
+    Bearing_Param_t bearing_Low = get_bearing_param(d34_L);
+
+    float d45_L0 = d34_L + 2 * h_L;
+    float d45_L = round_to_nearest(d45_L0, 2);
+    /*
+    if (d45_L0 > 37 && d45_L0 < 40)
+        d45_L = 40;
+    else if (d45_L0 > 40 && d45_L0 < 42)
+        d45_L = 42;
+    else if (d45_L0 > 42 && d45_L0 < 45)
+        d45_L = 45;
+       */
+    float d56_L0 = d45_L + 2 * h_L;
+    float d56_L = round_to_nearest(d56_L0, 2);
+    float d67_L = d34_L;
+    // ---- 低速轴长度设计----
+
+#if DEBUG_FLG
+    printf("----低速轴直径设计----\n");
+    printf("取轴肩h=1.2\n");
+    printf("按扭矩估算最小直径为dmin：%.2fmm, 取整为d1: %d mm\n", d0_L0, d0_L);
+    printf("计算得d2：%.2f mm, 取整为d2: %d mm\n", d23_L0, d23_L);
+    printf("计算得d3：%d mm, 结合轴承选型应取d3: %d mm\n", d34_L0, d34_L);
+    printf("计算得d4：%.2f mm, 取整为d4: %.2f mm\n", d45_L0, d45_L);
+    printf("计算得d5：%.2f mm, 取整为d5: %.2f mm\n", d56_L0, d56_L);
+    printf("计算得d6和d3相同，为%.2f mm\n", d67_L);
+    printf("轴承选型: %s, 内径:%d, 外径%d, 宽度:%d\n", bearing_Low.name, bearing_Low.d, bearing_Low.D, bearing_Low.B);
+    printf("\n");
 #endif
 
     char input;

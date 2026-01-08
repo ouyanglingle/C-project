@@ -1,5 +1,6 @@
 #include "param.h"
 #include "math.h"
+#include "stdio.h"
 
 Motor_Param_t motor_list[] = {
     {2.2f, 960.0f, "Y112M-6"},
@@ -79,3 +80,36 @@ int round_to_nearest(int value, int nearest)
 {
     return (int)(round((double)value / nearest) * nearest);
 }
+
+/// @brief 齿根弯曲疲劳强度校核
+/// @param T_i
+/// @param T_ii
+/// @param K_Ht 载荷系数
+/// @param B2 大齿轮齿宽
+/// @param m 模数
+/// @param n1 高速轴的转速
+void bending_fatigue_strength_check(float T_i, float K_Ht, float B2, float m, float n1)
+{
+    const int xigema_F1_Allowable = 476; // 单位MPa
+    const int xigema_f2_Allowable = 408; // 单位MPa
+
+    float Y_Fa1 = 2.94f; // 小齿轮齿形系数，小齿轮20齿，和课本取值是不一样的
+    float Y_Sa1 = 1.56f; // 小齿轮应力修正系数
+
+    float Y_Fa2 = 2.25f; // 大齿轮齿形系数, 大齿轮80齿，
+    float Y_Sa2 = 1.76f; // 大齿轮应力修正系数
+
+    float xigema_F1 = (2 * K_Ht * T_i * Y_Fa1 * Y_Sa1) / (B2 * m * m * 20.0f);
+    float xigema_F2 = xigema_F1 * (Y_Fa2 * Y_Sa2) / (Y_Fa1 * Y_Sa1);
+
+    // 齿轮的圆周速度
+    float v1 = (PI * m * 20.0f * n1) / (60 * 1000.0f);
+
+    printf("----按齿根弯曲疲劳强度校核----\n");
+    printf("σ_F1 = %.3f MPa %c [σ_F1] = %d\n", xigema_F1, xigema_F1 < xigema_F1_Allowable ? '<' : '>', xigema_F1_Allowable);
+    printf("σ_F2 = %.3f MPa %c [σ_F2] = %d\n", xigema_F2, xigema_F2 < xigema_f2_Allowable ? '<' : '>', xigema_f2_Allowable);
+    printf("齿轮圆周速度v1 = %.3f m/s %c 八级直齿圆柱轮的6m/s\n", v1, v1 < 6.0f ? '<' : '>');
+    printf("\n");
+}
+
+/// @brief 轴的
