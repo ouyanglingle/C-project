@@ -88,7 +88,7 @@ int round_to_nearest(int value, int nearest)
 /// @param B2 大齿轮齿宽
 /// @param m 模数
 /// @param n1 高速轴的转速
-void bending_fatigue_strength_check(float T_i, float K_Ht, float B2, float m, float n1)
+void bending_fatigue_strength_check(float T_i, float K_Ht, float B2, float m, float n1, float Z1)
 {
     const int xigema_F1_Allowable = 476; // 单位MPa
     const int xigema_f2_Allowable = 408; // 单位MPa
@@ -99,11 +99,11 @@ void bending_fatigue_strength_check(float T_i, float K_Ht, float B2, float m, fl
     float Y_Fa2 = 2.25f; // 大齿轮齿形系数, 大齿轮80齿，
     float Y_Sa2 = 1.76f; // 大齿轮应力修正系数
 
-    float xigema_F1 = (2 * K_Ht * T_i * Y_Fa1 * Y_Sa1) / (B2 * m * m * 20.0f);
+    float xigema_F1 = (2 * K_Ht * T_i * Y_Fa1 * Y_Sa1) / (B2 * m * m * Z1);
     float xigema_F2 = xigema_F1 * (Y_Fa2 * Y_Sa2) / (Y_Fa1 * Y_Sa1);
 
     // 齿轮的圆周速度
-    float v1 = (PI * m * 20.0f * n1) / (60 * 1000.0f);
+    float v1 = (PI * m * Z1 * n1) / (60 * 1000.0f);
 
     printf("----按齿根弯曲疲劳强度校核----\n");
     printf("σ_F1 = %.3f MPa %c [σ_F1] = %d\n", xigema_F1, xigema_F1 < xigema_F1_Allowable ? '<' : '>', xigema_F1_Allowable);

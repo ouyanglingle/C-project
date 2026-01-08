@@ -26,6 +26,6 @@ Motor_Param_t get_nw_param(float P_w);
 Bearing_Param_t get_bearing_param(int d);
 
 int round_to_nearest(int value, int nearest);
-void bending_fatigue_strength_check(float T_i, float K_Ht, float B2, float m, float n1);
+void bending_fatigue_strength_check(float T_i, float K_Ht, float B2, float m, float n1, float Z1);
 
 #endif
