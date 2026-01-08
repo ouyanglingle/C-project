@@ -2,34 +2,179 @@
 #include "math.h"
 #include "stdio.h"
 
-Motor_Param_t motor_list[] = {
-    {2.2f, 960.0f, "Y112M-6"},
-    {3.0f, 960.0f, "Y132S-6"},
-    {4.0f, 960.0f, "Y132M1-6"},
-    {0, 0, "ERR"},
+/// @brief 判断x是否在区间(a, b)内，如果是则返回更接近x的端点值
+/// @param a 区间左端点
+/// @param b 区间右端点
+/// @param x 待判断的数值
+/// @return 如果x在区间(a, b)内，返回更接近x的端点值；否则返回-1表示不在区间内
+float find_closest_endpoint(float a, float b, float x)
+{
+    // 确保a是较小值，b是较大值
+    if (a > b)
+    {
+        float temp = a;
+        a = b;
+        b = temp;
+    }
+
+    // 判断x是否在区间(a, b)内
+    if (x > a && x < b)
+    {
+        // 计算x到两端点的距离
+        float dist_to_a = x - a;
+        float dist_to_b = b - x;
+
+        // 返回更接近的端点
+        if (dist_to_a <= dist_to_b)
+        {
+            return a;
+        }
+        else
+        {
+            return b;
+        }
+    }
+    else
+    {
+        // x不在区间(a, b)内，返回一个特殊值表示无效
+        return -1; // 或者可以根据实际需求返回其他值
+    }
+}
+
+/// @brief 判断x是否在数组相邻元素构成的区间内，如果是则返回更接近x的数组元素
+/// @param arr 输入数组
+/// @param size 数组大小
+/// @param x 待判断的数值
+/// @param index 如果返回值不为-1，则index存储对应元素的索引
+/// @return 如果x在某个相邻元素区间内，返回更接近x的数组元素；否则返回-1表示不在任何区间内
+float find_closest_in_array_range(float arr[], int size, float x, int *index)
+{
+    if (size < 2)
+    {
+        if (index != NULL)
+        {
+            *index = -1; // 设置索引为无效值
+        }
+        return -1; // 数组元素少于2个，无法构成区间
+    }
+
+    // 遍历数组，检查x是否在相邻两个元素构成的区间内
+    for (int i = 0; i < size - 1; i++)
+    {
+        float left = arr[i];
+        float right = arr[i + 1];
+        int left_index = i;
+        int right_index = i + 1;
+
+        // 确保left <= right，同时保持原始索引
+        if (left > right)
+        {
+            float temp = left;
+            left = right;
+            right = temp;
+
+            int temp_index = left_index;
+            left_index = right_index;
+            right_index = temp_index;
+        }
+
+        // 检查x是否在区间(left, right)内
+        if (x > left && x < right)
+        {
+            // 计算x到两端点的距离
+            float dist_to_left = x - left;
+            float dist_to_right = right - x;
+
+            // 返回更接近的端点，并设置索引
+            if (dist_to_left <= dist_to_right)
+            {
+                if (index != NULL)
+                {
+                    *index = left_index;
+                }
+                return left;
+            }
+            else
+            {
+                if (index != NULL)
+                {
+                    *index = right_index;
+                }
+                return right;
+            }
+        }
+    }
+
+    // x不在任何相邻元素构成的区间内
+    if (index != NULL)
+    {
+        *index = -1; // 设置索引为无效值
+    }
+    return -1;
+}
+
+/// @brief 将传入的浮点数向上取整为比它大的最近的整数
+/// @param value_abs 待取整的浮点数绝对值
+/// @return 比value大的最近的整数
+int round_upper(float value_abs)
+{
+    int int_value = (int)value_abs; // 获取整数部分
+
+    // 如果value本身就是整数，直接返回
+    if (value_abs == int_value)
+    {
+        return int_value;
+    }
+
+    // 如果value是正数且不是整数，返回int_value + 1
+    if (value_abs > 0)
+    {
+        return int_value + 1;
+    }
+
+    // 如果value是负数，由于(int)value会向下取整，所以直接返回int_value
+    // 例如: value = -2.3, (int)value = -2, -2 > -2.3，符合向上取整
+    return int_value;
+}
+
+Motor_Param_t motor_list[2][4] = {
+    {
+        {2.2f, 960.0f, "Y112M-6"},
+        {3.0f, 960.0f, "Y132S-6"},
+        {4.0f, 960.0f, "Y132M1-6"},
+        {0, 0, "ERR"},
+    },
+
+    {
+        {2.2f, 1430.0f, "Y100L1-4"},
+        {3.0f, 1430.0f, "Y100L2-4"},
+        {4.0f, 1440.0f, "Y112M-4"},
+        {0, 0, "ERR"},
+    },
 };
 
 /// @brief 获取电机参数
 /// @param P_w 卷筒所需功率
 /// @return Motor_Param_t电机参数结构体
-Motor_Param_t get_nw_param(float P_w)
+Motor_Param_t get_nw_param(float P_w, int id)
 {
     Motor_Param_t param = {0};
     if (P_w > 1.5f && P_w < 2.2f)
     {
-        param = motor_list[0];
+
+        param = id < 1 ? motor_list[0][0] : motor_list[1][0];
     }
     else if (P_w > 2.2f && P_w < 3.0f)
     {
-        param = motor_list[1];
+        param = id < 1 ? motor_list[0][1] : motor_list[1][1];
     }
     else if (P_w > 3.0f && P_w < 4.0f)
     {
-        param = motor_list[2];
+        param = id < 1 ? motor_list[0][2] : motor_list[1][3];
     }
     else
     {
-        param = motor_list[3];
+        param = id < 1 ? motor_list[0][3] : motor_list[1][3];
     }
     return param;
 }
