@@ -522,16 +522,16 @@ int main(int argc, char *argv[])
     float D2_L = bearing_Low.D + 5.0 * d3_3;
     printf("----补充箱体设计----\n");
     printf("高速轴的轴承端盖外径为%.2f, 低速轴的轴承端盖外径为%.2f\n", D2_H, D2_L);
-    // char input;
-    // printf("按Q键退出程序...\n");
-    // while (1)
-    // {
-    //     printf("\r等待输入... (按Q退出) ");
-    //     fflush(stdout);
-    //     if (scanf("%c", &input))
-    //         if (input == 'q' || input == 'Q')
-    //             break;
-    // }
+    char input;
+    printf("按Q键退出程序...\n");
+    while (1)
+    {
+        printf("\r等待输入... (按Q退出) ");
+        fflush(stdout);
+        if (scanf("%c", &input))
+            if (input == 'q' || input == 'Q')
+                break;
+    }
 
     return 0;
 }
