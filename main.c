@@ -158,261 +158,376 @@ int main(int argc, char *argv[])
     printf("\n");
 #endif
 
-        // ---- 齿轮设计 ----
-        const int16_t xigema_H1 = 655;
-        const int16_t xigema_H2 = 559;
-        const int16_t xigema_F1 = 476;
-        const int16_t xigema_F2 = 408;
-        const float K_Ht = 1.50f;             // 载荷系数
-        const float φd = 0.8;                 // 齿宽系数
-        const float Z_H = 2.49;               //
-        const float Z_E = 188.9;              // 区域系数
-        const float cos20 = 0.9396926207859f; // Cos(20°)结果
-        const float tan20 = 0.3639702342662f; // tan(20°)结果
-        const uint16_t Z1 = 20;               // 小齿轮齿数默认20
-        float Z2 = Z1 * i_1;                  // 大齿轮齿数
-        //
-        float d1 = 2.32f * pow((K_Ht * T_i / φd) * ((i_1 + 1) / i_1) * (Z_E / xigema_H2) * (Z_E / xigema_H2), 1.0f / 3.0f);
-        // 计算模数
-        float m_1 = d1 / Z1;
-        float m = 0.0f;
-        if (m_1 > 2 && m_1 < 2.5)
-            m = 2.5f;
-        else if (m_1 > 1.5 && m_1 < 2)
-            m = 2.0f;
-        else if (m_1 > 2.5 && m_1 < 3)
-            m = 3.0f;
-        else if (round(m_1) < m_1 && m_1 > 3 && round(m_1) < 3.5)
-            m = 3.0f;
-        // 计算中心距
-        float a = (Z1 + Z2) * m / 2.0f;
-        float d_1 = m * Z1; // 小齿轮分度圆
-        float d_2 = m * Z2; // 大齿轮分度圆
-        // 计算齿宽
-        float b = φd * d1;
-        int16_t B2 = round_to_nearest((int16_t)b, 5); // 大齿轮宽度
-        int16_t B1 = B2 + 5;                          // 小齿轮宽度
-        // 计算齿轮其它几何参数
-        float h_a = m * 1; // 齿顶高，标准齿的ha*为1
-        // // 计算接触疲劳强度用重合度系数Zε
-        // float alpha_a1 = acosf((Z1 * cos20) / (Z1 + 2)); // * 180.0f / PI;
-        // float alpha_a2 = acosf((Z2 * cos20) / (Z2 + 2)); // * 180.0f / PI;
-        // 计算
-    #if DEBUG_FLG
-        printf("四、齿轮设计\n");
-        printf("小齿轮40MnB调质, 大齿轮ZG35SiMn调质\n");
-        printf("小齿轮齿数默认 %d,\n", Z1);
-        printf("初次计算小齿轮直径D1: %.3f mm, 计算得模数为: %.2f, 最终模数为: %.2fmm\n", d1, m_1, m);
-        printf("最终小齿轮分度圆：%.2f, 大齿轮分度圆: %.2f\n", d_1, d_2);
-        printf("中心距a为: %.2f mm\n", a);
-        printf("通过公式b = φd * d1计算的齿宽为b: %.2f mm\n", b);
-        printf("小齿轮齿宽B1: %d mm, 大齿轮齿宽B2: %d mm\n", B1, B2);
-        printf("剩下的自己算吧\n");
-        printf("\n");
-    #endif
-        bending_fatigue_strength_check(T_i, K_Ht, B2, m, n_i, Z1); // 齿根弯曲疲劳强度校核
+    // ---- 齿轮设计 ----
+    const int16_t xigema_H1 = 655;
+    const int16_t xigema_H2 = 559;
+    const int16_t xigema_F1 = 476;
+    const int16_t xigema_F2 = 408;
+    const float K_Ht = 1.50f;             // 载荷系数
+    const float φd = 0.8;                 // 齿宽系数
+    const float Z_H = 2.49;               //
+    const float Z_E = 188.9;              // 区域系数
+    const float cos20 = 0.9396926207859f; // Cos(20°)结果
+    const float tan20 = 0.3639702342662f; // tan(20°)结果
+    const uint16_t Z1 = 20;               // 小齿轮齿数默认20
+    float Z2 = Z1 * i_1;                  // 大齿轮齿数
+    //
+    float d1 = 2.32f * pow((K_Ht * T_i / φd) * ((i_1 + 1) / i_1) * (Z_E / xigema_H2) * (Z_E / xigema_H2), 1.0f / 3.0f);
+    // 计算模数
+    float m_1 = d1 / Z1;
+    float m = 0.0f;
+    if (m_1 > 2 && m_1 < 2.5)
+        m = 2.5f;
+    else if (m_1 > 1.5 && m_1 < 2)
+        m = 2.0f;
+    else if (m_1 > 2.5 && m_1 < 3)
+        m = 3.0f;
+    else if (round(m_1) < m_1 && m_1 > 3 && round(m_1) < 3.5)
+        m = 3.0f;
+    // 计算中心距
+    float a = (Z1 + Z2) * m / 2.0f;
+    float d_1 = m * Z1; // 小齿轮分度圆
+    float d_2 = m * Z2; // 大齿轮分度圆
+    // 计算齿宽
+    float b = φd * d1;
+    int16_t B2 = round_to_nearest((int16_t)b, 5); // 大齿轮宽度
+    int16_t B1 = B2 + 5;                          // 小齿轮宽度
+    // 计算齿轮其它几何参数
+    float h_a = m * 1; // 齿顶高，标准齿的ha*为1
+    // // 计算接触疲劳强度用重合度系数Zε
+    // float alpha_a1 = acosf((Z1 * cos20) / (Z1 + 2)); // * 180.0f / PI;
+    // float alpha_a2 = acosf((Z2 * cos20) / (Z2 + 2)); // * 180.0f / PI;
+    // 计算
+#if DEBUG_FLG
+    printf("四、齿轮设计\n");
+    printf("小齿轮40MnB调质, 大齿轮ZG35SiMn调质\n");
+    printf("小齿轮齿数默认 %d,\n", Z1);
+    printf("初次计算小齿轮直径D1: %.3f mm, 计算得模数为: %.2f, 最终模数为: %.2fmm\n", d1, m_1, m);
+    printf("最终小齿轮分度圆：%.2f, 大齿轮分度圆: %.2f\n", d_1, d_2);
+    printf("中心距a为: %.2f mm\n", a);
+    printf("通过公式b = φd * d1计算的齿宽为b: %.2f mm\n", b);
+    printf("小齿轮齿宽B1: %d mm, 大齿轮齿宽B2: %d mm\n", B1, B2);
+    printf("剩下的自己算吧\n");
+    printf("\n");
+#endif
+    bending_fatigue_strength_check(T_i, K_Ht, B2, m, n_i, Z1); // 齿根弯曲疲劳强度校核
 
-        // ---- 轴的设计与校核 ----
-        // 选用45调质材料，假装按照课本算到危险截面的当量弯矩Me
-        const uint8_t A0 = 110;
-        float d0 = A0 * pow(P_i / n_i, 1.0f / 3.0f);
-        // 安装平键，所以加大5%
-        float d = d0 * 1.05f;
-        // 四舍五入最终选取
-        d = round_to_nearest(d, 2);
-        // 选用课本方案二, 取定位轴肩h=2mm
-        const uint8_t h = 2;
-        float d12 = d;
-        float d23 = d12 + 2 * h;
-        if (d23 > d12 && d23 < 25) // 教材表5.2
-            d23 = 25;
-        else if (d23 > 25 && d23 < 28)
-            d23 = 28;
-        else if (d23 > 28 && d23 < 30)
-            d23 = 30;
-        d23 = round(d23);
+    // ---- 轴的设计与校核 ----
+    // 选用45调质材料，假装按照课本算到危险截面的当量弯矩Me
+    const uint8_t A0 = 110;
+    float d0 = A0 * pow(P_i / n_i, 1.0f / 3.0f);
+    // 安装平键，所以加大5%
+    float d = d0 * 1.05f;
+    // 四舍五入最终选取
+    d = round_to_nearest(d, 2);
+    // 选用课本方案二, 取定位轴肩h=2mm
+    const uint8_t h = 2;
+    float d12 = d;
+    float d23 = d12 + 2 * h;
+    if (d23 > d12 && d23 < 25) // 教材表5.2
+        d23 = 25;
+    else if (d23 > 25 && d23 < 28)
+        d23 = 28;
+    else if (d23 > 28 && d23 < 30)
+        d23 = 30;
+    d23 = round(d23);
 
-        float $d34 = d23 + 2 * h;
-        float d34 = $d34;
-        if ($d34 < 30)
-            d34 = 30;
-        else if ($d34 > 30 && $d34 < 35)
-            d34 = 35;
-        d34 = round(d34);
-        float d45 = round(d34 + 2 * h);
-        float d4 = d45;
-        if (d4 > 31.5 && d4 < 33.5)
-            d4 = 33.5;
-        else if (d4 > 33.5 && d4 < 35.5)
-            d4 = 35.5;
-        else if (d4 > 35.5 && d4 < 37.5)
-            d4 = 37.5;
-        d4 = round(d4);
+    float $d34 = d23 + 2 * h;
+    float d34 = $d34;
+    if ($d34 < 30)
+        d34 = 30;
+    else if ($d34 > 30 && $d34 < 35)
+        d34 = 35;
+    d34 = round(d34);
+    float d45 = round(d34 + 2 * h);
+    float d4 = d45;
+    if (d4 > 31.5 && d4 < 33.5)
+        d4 = 33.5;
+    else if (d4 > 33.5 && d4 < 35.5)
+        d4 = 35.5;
+    else if (d4 > 35.5 && d4 < 37.5)
+        d4 = 37.5;
+    d4 = round(d4);
 
-        float d56 = d4 + 2 * h;
-        float d5 = round(d56);
-        if (d5 > 35.5 && d5 < 37.5)
-            d5 = 37.5;
-        else if (d5 > 37.5 && d5 < 40)
-            d5 = 40;
-        else if (d5 > 40 && d5 < 42.5)
-            d5 = 42.5;
-        float d6 = round(d34);
+    float d56 = d4 + 2 * h;
+    float d5 = round(d56);
+    if (d5 > 35.5 && d5 < 37.5)
+        d5 = 37.5;
+    else if (d5 > 37.5 && d5 < 40)
+        d5 = 40;
+    else if (d5 > 40 && d5 < 42.5)
+        d5 = 42.5;
+    float d6 = round(d34);
 
-    #if DEBUG_FLG
-        printf("五、轴的初步设计与校核\n");
-        printf("轴的材质为45调质\n");
-        printf("----高速轴直径设计----\n");
-        printf("轴的设计直径d: %.2f mm\n", d);
-        printf("轴的直径d1: %.2f mm\n", d12);
-        printf("轴的直径d2: %.2f mm\n", d23);
-        printf("轴的直径d3理论为: %.2f mm, 结合轴承选型应为%.2fmm, 实际上用表5.2就有国标轴承能用\n", $d34, d34); // 实际上用表5.2就有国标轴承能用
-        printf("轴的直径d4: %.2f mm\n", d4);
-        printf("轴的直径d5: %.2f mm\n", d5);
-        printf("轴的直径d6: %.2f mm\n", d6);
-        printf("\n");
-    #endif
-        // ----箱体设计----
-        // 机座壁厚
-        float delta = 0.025 * a + 1;
-        delta = delta < 8 ? 8 : delta;
-        // 机盖壁厚
-        float delta_1 = 0.02 * a + 1;
-        delta_1 = delta_1 < 8 ? 8 : delta_1;
-        float b0 = 1.5 * delta;            // 机座凸缘厚度
-        float b1 = 1.5 * delta_1;          // 机盖凸缘厚度
-        float b2 = 2.5 * delta;            // 机座底凸缘厚度
-        uint8_t d_f = 0.036 * a + 12;      // 地脚螺栓直径
-        uint8_t n = a <= 250 ? 4 : 6;      // 地脚螺栓数目
-        uint8_t d1_1 = 0.75 * d_f;         // 轴承旁连接螺栓直径
-        uint8_t d3_3 = 0.45 * d_f;         // 轴承端盖螺钉直径
-        float m0_0 = 0.85 * delta;         // 机座肋厚
-        uint8_t e = 1.2 * d3_3;            // 轴承端盖凸缘厚度
-        float Delta1 = round(1.2 * delta); // 大齿轮顶圆与内机壁距离，教材说大于1.2倍delta即可,我取10
-        float Delta2 = 10;                 // 齿轮端面与内机壁距离,教材说大于delta同时一般取>=10
-        uint8_t Delta3 = 4;                // 教材使用了脂润滑，△3在3~5只之间即可
-        uint8_t c1 = 0, c2 = 0, D0 = 0;    // df,d1,d2到外机壁距离 ; df,d2到凸缘边缘距离 ; 未知
-        switch (d1_1)
-        {
-        case 8:
-            c1 = 13, c2 = 11, D0 = 18;
-            break;
-        case 10:
-            c1 = 16, c2 = 14, D0 = 22;
-            break;
-        case 12:
-            c1 = 18, c2 = 16, D0 = 26;
-            break;
-        case 14:
-            c1 = 20, c2 = 18, D0 = 30;
-            break;
-        default:
-            break;
-        }
-        uint16_t B = delta + c1 + c2 + 5; // 轴承座宽度尺寸
+#if DEBUG_FLG
+    printf("五、轴的初步设计与校核\n");
+    printf("轴的材质为45调质\n");
+    printf("----高速轴直径设计----\n");
+    printf("轴的设计直径d: %.2f mm\n", d);
+    printf("轴的直径d1: %.2f mm\n", d12);
+    printf("轴的直径d2: %.2f mm\n", d23);
+    printf("轴的直径d3理论为: %.2f mm, 结合轴承选型应为%.2fmm, 实际上用表5.2就有国标轴承能用\n", $d34, d34); // 实际上用表5.2就有国标轴承能用
+    printf("轴的直径d4: %.2f mm\n", d4);
+    printf("轴的直径d5: %.2f mm\n", d5);
+    printf("轴的直径d6: %.2f mm\n", d6);
+    printf("\n");
+#endif
+    // ----箱体设计----
+    // 机座壁厚
+    float delta = 0.025 * a + 1;
+    delta = delta < 8 ? 8 : delta;
+    // 机盖壁厚
+    float delta_1 = 0.02 * a + 1;
+    delta_1 = delta_1 < 8 ? 8 : delta_1;
+    float b0 = 1.5 * delta;            // 机座凸缘厚度
+    float b1 = 1.5 * delta_1;          // 机盖凸缘厚度
+    float b2 = 2.5 * delta;            // 机座底凸缘厚度
+    uint8_t d_f = 0.036 * a + 12;      // 地脚螺栓直径
+    uint8_t n = a <= 250 ? 4 : 6;      // 地脚螺栓数目
+    uint8_t d1_1 = 0.75 * d_f;         // 轴承旁连接螺栓直径
+    uint8_t d3_3 = 0.45 * d_f;         // 轴承端盖螺钉直径
+    float m0_0 = round(0.85 * delta);  // 机座肋厚
+    uint8_t e = 1.2 * d3_3;            // 轴承端盖凸缘厚度
+    float Delta1 = round(1.2 * delta); // 大齿轮顶圆与内机壁距离，教材说大于1.2倍delta即可,我取10
+    float Delta2 = 10;                 // 齿轮端面与内机壁距离,教材说大于delta同时一般取>=10
+    uint8_t Delta3 = 4;                // 教材使用了脂润滑，△3在3~5只之间即可
+    uint8_t c1 = 0, c2 = 0, D0 = 0;    // df,d1,d2到外机壁距离 ; df,d2到凸缘边缘距离 ; 未知
+    switch (d1_1)
+    {
+    case 8:
+        c1 = 13, c2 = 11, D0 = 18;
+        break;
+    case 10:
+        c1 = 16, c2 = 14, D0 = 22;
+        break;
+    case 12:
+        c1 = 18, c2 = 16, D0 = 26;
+        break;
+    case 14:
+        c1 = 20, c2 = 18, D0 = 30;
+        break;
+    default:
+        break;
+    }
+    uint16_t B = delta + c1 + c2 + 5; // 轴承座宽度尺寸
 
-    #if DEBUG_FLG
-        printf("六、箱体设计\n");
-        printf("机座壁厚: %.3f mm, 机盖壁厚: %.3f mm\n", delta, delta_1);
-        printf("机座凸缘厚度b: %.3f mm, 机盖凸缘厚度b1: %.3f mm\n", b0, b1);
-        printf("机座底凸缘厚度b2: %.3f mm\n", b2);
-        printf("地脚螺栓直径df: %d mm, 地脚螺栓数目n: %d, 轴承旁连接螺栓直径d1:%d\n", d_f, n, d1_1);
-        printf("机座肋厚m0: %.3f mm\n", m0_0);
-        printf("轴承端盖螺钉直径d3: %d mm, 轴承端盖凸缘厚度:e %d mm\n", d3_3, e);
-        printf("大齿轮顶圆与内机壁距离△1: %.2f mm, 齿轮端面与内机壁距离△2: %.2f mm, 脂润滑△3为%d\n", Delta1, Delta2, Delta3);
-        printf("df,d1,d2到外机壁距离c1: %dmm, df,d2到凸缘边缘距离c2: %dmm, D0: %dmm\n", c1, c2, D0);
-        printf("轴承座宽度尺寸B: %d mm\n", B);
-        printf("\n");
-    #endif
-        // ----高速轴长度设计----
-        const uint8_t L_B = 25; // 讲义的图上有25mm
-        const uint8_t W_V = 50; // 讲义的带轮宽50mm
-        // 小齿轮所受的圆周力
-        float F_t1 = 2 * T_i / d_1;
-        // 小齿轮所受径向力
-        float F_r1 = F_t1 * tan20;
-        // 轴承选型
-        Bearing_Param_t bearing_High = get_bearing_param((int)d34);
+#if DEBUG_FLG
+    printf("六、箱体设计\n");
+    printf("机座壁厚: %.3f mm, 机盖壁厚: %.3f mm\n", delta, delta_1);
+    printf("机座凸缘厚度b: %.3f mm, 机盖凸缘厚度b1: %.3f mm\n", b0, b1);
+    printf("机座底凸缘厚度b2: %.3f mm\n", b2);
+    printf("地脚螺栓直径df: %d mm(如果是17就取16), 地脚螺栓数目n: %d, 轴承旁连接螺栓直径d1:%d（如果是7就取8）\n", d_f, n, d1_1);
+    printf("机座肋厚m0: %.3f mm\n", m0_0);
+    printf("轴承端盖螺钉直径d3: %d mm（如果是7就取8）, 轴承端盖凸缘厚度:e %d mm\n", d3_3, e);
+    printf("大齿轮顶圆与内机壁距离△1: %.2f mm, 齿轮端面与内机壁距离△2: %.2f mm, 脂润滑△3为%d\n", Delta1, Delta2, Delta3);
+    printf("df,d1,d2到外机壁距离c1: %dmm, df,d2到凸缘边缘距离c2: %dmm, D0: %dmm\n", c1, c2, D0);
+    printf("轴承座宽度尺寸B: %d mm\n", B);
+    printf("\n");
+#endif
+    // ----高速轴长度设计----
+    const uint8_t L_B = 25; // 讲义的图上有25mm
+    const uint8_t W_V = 50; // 讲义的带轮宽50mm
 
-        float L1 = W_V - 2;
-        float L2_0 = L_B + e + m0_0;
-        float L2 = L2_0;
-        if (round(L2_0) < L2_0)
-            L2 = round(L2_0) + 1;
-        else
-            L2 = round(L2_0);
-        float L3 = bearing_High.B + Delta3 + Delta2 + 3;
-        float L4 = B1 - 3; // 用齿轮宽度减去2~3
-        float L5 = 6;
-        float L6 = bearing_High.B + Delta3 + 3;
+    // 轴承选型
+    Bearing_Param_t bearing_High = get_bearing_param((int)d34);
 
-    #if DEBUG_FLG
-        printf("----高速轴长度设计----\n");
-        printf("小齿轮所受的圆周力为: %.2f\n", F_t1);
-        printf("小齿轮所受的径向力为: %.2f\n", F_r1);
-        printf("轴承选型: %s, 内径:%d, 外径%d, 宽度:%d\n", bearing_High.name, bearing_High.d, bearing_High.D, bearing_High.B);
-        printf("第一段长L1: %.2f\n", L1);
-        printf("第二段长L2: %.2f\n", L2);
-        printf("第三段长L3: %.2f\n", L3);
-        printf("第四段长L4: %.2f\n", L4);
-        printf("第五段长L5和轴环宽度相等: %.2f\n", L5);
-        printf("第六段长L6: %.2f\n", L6);
-        printf("\n");
-    #endif
-        // ----低速轴直径设计----
-        const float h_L = 1.5;
-        float d0_L0 = A0 * pow(P_ii / n_ii, 1.0f / 3.0f);
-        uint8_t d0_L = round_to_nearest(d0_L0, 2);
-        uint8_t d12_L = d0_L;
-        uint8_t d23_L = 0;
-        float d23_L0 = d12_L + 2 * h_L;
-        if (d23_L0 > d12_L && d23_L0 < 37.5) // 教材表5.2
-            d23_L = round_to_nearest(d23_L0, 2);
+    float L1 = W_V - 2;
+    float L2_0 = L_B + e + m0_0;
+    float L2 = L2_0;
+    if (round(L2_0) < L2_0)
+        L2 = round(L2_0) + 1;
+    else
+        L2 = round(L2_0);
+    float L3 = bearing_High.B + Delta3 + Delta2 + 3;
+    float L4 = B1 - 3; // 用齿轮宽度减去2~3
+    float L5 = 6;
+    float L6 = bearing_High.B + Delta3 + 3;
 
-        uint8_t d34_L, d34_L0;
-        d34_L0 = d23_L + 2 * h_L;
-        if (d34_L0 > 30 && d34_L0 <= 35)
-            d34_L = 35;
-        else if (d34_L0 > 35 && d34_L0 <= 40)
-            d34_L = 40;
+#if DEBUG_FLG
+    printf("----高速轴长度设计----\n");
 
-        Bearing_Param_t bearing_Low = get_bearing_param(d34_L);
+    printf("轴承选型: %s, 内径:%d, 外径%d, 宽度:%d\n", bearing_High.name, bearing_High.d, bearing_High.D, bearing_High.B);
+    printf("第一段长L1: %.2f\n", L1);
+    printf("第二段长L2: %.2f\n", L2);
+    printf("第三段长L3: %.2f\n", L3);
+    printf("第四段长L4: %.2f\n", L4);
+    printf("第五段长L5和轴环宽度相等: %.2f\n", L5);
+    printf("第六段长L6: %.2f\n", L6);
+    printf("\n");
+    // ----高速轴平键设计----
+    pingjian_t pingjian_H = {0};
+    pingjian_H = pingjian_param(d12);
+    float pingjian_L_select[] = {25, 28, 32, 36, 40, 45, 50, 56};
+    int pingjian_index = -1;
+    pingjian_H.L = find_closest_in_array_range(pingjian_L_select, sizeof(pingjian_L_select), L1 - 10.1, &pingjian_index);
+    pingjian_t pinfjian_chilun_H = {0};
 
-        float d45_L0 = d34_L + 2 * h_L;
-        float d45_L = round_to_nearest(d45_L0, 2);
-        /*
-        if (d45_L0 > 37 && d45_L0 < 40)
-            d45_L = 40;
-        else if (d45_L0 > 40 && d45_L0 < 42)
-            d45_L = 42;
-        else if (d45_L0 > 42 && d45_L0 < 45)
-            d45_L = 45;
-           */
-        float d56_L0 = d45_L + 2 * h_L;
-        float d56_L = round_to_nearest(d56_L0, 2);
-        float d67_L = d34_L;
-        // ---- 低速轴长度设计----
+    pinfjian_chilun_H = pingjian_param(d4);
+    int lingjian_chilyn_index = -1;
+    pinfjian_chilun_H.L = find_closest_in_array_range(pingjian_L_select, sizeof(pingjian_L_select), L4 - 9.1, &lingjian_chilyn_index);
+    /*
+    if (pingjian_H.L > L1)
+    {
+        pingjian_index -= 3;
+        pingjian_H.L = pingjian_L_select[pingjian_index];
+    }*/
 
-    #if DEBUG_FLG
-        printf("----低速轴直径设计----\n");
-        printf("取轴肩h=1.2\n");
-        printf("按扭矩估算最小直径为dmin：%.2fmm, 取整为d1: %d mm\n", d0_L0, d0_L);
-        printf("计算得d2：%.2f mm, 取整为d2: %d mm\n", d23_L0, d23_L);
-        printf("计算得d3：%d mm, 结合轴承选型应取d3: %d mm\n", d34_L0, d34_L);
-        printf("计算得d4：%.2f mm, 取整为d4: %.2f mm\n", d45_L0, d45_L);
-        printf("计算得d5：%.2f mm, 取整为d5: %.2f mm\n", d56_L0, d56_L);
-        printf("计算得d6和d3相同，为%.2f mm\n", d67_L);
-        printf("轴承选型: %s, 内径:%d, 外径%d, 宽度:%d\n", bearing_Low.name, bearing_Low.d, bearing_Low.D, bearing_Low.B);
-        printf("\n");
-    #endif
+    printf("----平键设计----\n");
+    printf("L1处选择的平键尺寸为bxh = %dx%d, 平键长度为 %d\n", pingjian_H.b, pingjian_H.h, pingjian_H.L);
+    printf("L4处选择的平键尺寸为bxh = %dx%d, 平键长度为 %d\n", pinfjian_chilun_H.b, pinfjian_chilun_H.h, pinfjian_chilun_H.L);
+    printf("取轴端倒角为C1.5,各轴肩处的圆角半径则由各轴肩决定\n");
+    printf("\n");
 
+    // ---- 高速轴校核 ----
+    const float c1_zhou = 1.25; // 齿轮倒角为1.25mm
+    float force_a_of_bearin = bearing_High.B / 2.0f;
+    float la_L1 = L1 / 2 + L2 + force_a_of_bearin;           // 第一段轴中点到轴承压力中心距离
+    float lb_L3 = L3 - c1_zhou + B1 / 2 - force_a_of_bearin; // 轴承压力中心到齿轮支点距离
+    float lc_L4 = lb_L3;                                     // 齿轮支点距离到轴承压力中心距离
+    // ---- 受力分析 ----
+    // 小齿轮所受的圆周力
+    float F_t1 = 2 * T_i / d_1;
+    // 小齿轮所受径向力
+    float F_r1 = F_t1 * tan20;
+    float F_NH1 = F_t1 * lc_L4 / (lb_L3 + lc_L4);                                   // 水平支反力
+    float F_NH2 = F_t1 * lb_L3 / (lb_L3 + lc_L4);                                   // 水平支反力
+    float F_NV1 = (F_r1 * lc_L4 - F_Q * (la_L1 + lb_L3 + lc_L4)) / (lb_L3 + lc_L4); // 垂直支反力
+    float F_NV2 = F_NV1;                                                            // 垂直支反力
+    float M_BV = F_Q * la_L1;                                                       // 截面B处的垂直弯矩
+    float M_CH1 = F_NH1 * lb_L3;                                                    // 截面C处的水平弯矩
+    float M_CH2 = M_CH1;                                                            //
+    float M_CV1 = F_NV1 * lb_L3 + F_Q * (la_L1 + lb_L3);                            // 截面C的垂直弯矩
+    float M_B1 = sqrt(M_BV * M_BV);                                                 // 截面B的合成弯矩
+    float M_C1 = sqrt(M_CH1 * M_CH1 + M_CV1 * M_CV1);                               // 截面C的合成弯矩
+    float M_C2 = M_C1;                                                              // M_A是0
+    float M_eA = sqrt(pow(0.6 * T_i, 2));                                           // 截面A的当量弯矩M_eA
+    float M_eB = sqrt(pow(M_B1, 2) + pow(0.6 * T_i, 2));                            // 截面B的当量弯矩M_eB
+    float M_eC = sqrt(pow(M_C1, 2) + pow(0.6 * T_i, 2));                            // 截面C的当量弯矩M_eC
+    float D_H_design = pow((M_eC / (0.1f * 60)), 1.0f / 3.0f);                      // 高速轴D
+
+    printf("---- 高速轴校核 ----\n");
+    printf("查表的轴承%s的压力中心为a=%.2fmm\n", bearing_High.name, force_a_of_bearin);
+    printf("齿轮倒角为%.3fmm\n", c1_zhou);
+    printf("第一段轴中点到轴承压力中心距离la = %.2f mm\n", la_L1);
+    printf("轴承压力中心到齿轮支点距离lb = %.2f mm\n", lb_L3);
+    printf("齿轮支点距离到轴承压力中心距离lc=lb = %.2f mm\n", lc_L4);
+    printf("小齿轮所受圆周力Ft1=%.3fN, 径向力Fr1=%.3fN\n", F_t1, F_r1);
+    printf("水平支反力F_NH1=F_NH2=%.3fN, 垂直支反力F_NV1=F_NV2=%.3fN\n", F_NH1, F_NV1);
+    printf("截面B的垂直弯矩M_BV=%.3fN·mm, 截面C的水平弯矩M_CH1=M_CH2=%.3fN·mm, 截面C的垂直弯矩M_CV1=M_CV2=%.3fN·mm\n", M_BV, M_CH1, M_CV1);
+    printf("分别作水平面的弯矩图（图b）和垂直面弯矩图（图c）\n");
+    printf("截面B处的合成弯矩M_B=%.3fN·mm, 截面C处的合成弯矩M_C=%.3fN·mm\n", M_B1, M_C1);
+    printf("截面A的当量弯矩M_eA = %.3f N·mm, 截面B的当量弯矩M_eA = %.3f N·mm, 截面C的当量弯矩M_eA = %.3f N·mm\n", M_eA, M_eB, M_eC);
+    printf("计算危险截面C处轴的直径\n轴的材质为45钢调质，查表14-1得xigema_B = 650MPa, 表14-3得[xigema -1b] = 60MPa\n");
+    printf("计算得到危险处的轴（就是齿轮处）的直径至少为d = %.3f mm,  包符合的\n", D_H_design);
+    printf("\n");
+
+    // ---- 高速轴轴承校核 ----
+    const float LifeTimeNeed = 38400;                                                                   // 要求轴承的寿命是38400h
+    float Fr1_H = sqrt(pow(F_NH1, 2) + pow(F_NV1, 2));                                                  // 计算合成后的支反力
+    float Fr2_H = sqrt(pow(F_NH2, 2) + pow(F_NV2, 2));                                                  // 计算合成后的支反力
+    float Fa1_H = 0, Fa2_H = 0;                                                                         // 因为不受轴向力，所以Fa1=Fa2=0
+                                                                                                        // 故Fa/Fr=0<e,则X1=1, Y1=1, X2=1, Y2=0
+    float Pr1_H = 1 * (1 * Fr1_H + 1 * Fa1_H);                                                          // P_r1 = f_d x (X_1 x F_r1 + Y_1xF_a1 )
+    float Pr2_H = 1 * (1 * Fr2_H + 1 * Fa2_H);                                                          // P_r2 = f_d x (X_2 x F_r2 + Y_2xF_a2 )
+    float LifeTime_H = 1000 * (pow(10, 6) / (60 * n_i)) * pow((bearing_High.Cr / bearing_High.C0r), 3); // 轴承的寿命
+
+    printf("---- 高速轴轴承校核 ----\n");
+    printf("由前面的计算已知轴水平和垂直面的支反力，则可以计算得到合成支反力:\n");
+    printf("Fr1=%.3fN, Fr2=%.3fN\n", Fr1_H, Fr2_H);
+    printf("P_r1=%.3fN, P_r2=%.3fN\n", Pr1_H, Pr2_H);
+    printf("求取轴承的寿命LifeTime_H=%.3fh\n", LifeTime_H);
+
+#endif
+    // ----低速轴直径设计----
+    const float h_L = 1.5;
+    float d0_L0 = A0 * pow(P_ii / n_ii, 1.0f / 3.0f);
+    uint8_t d0_L = round_to_nearest(d0_L0, 2);
+    uint8_t d12_L = d0_L;
+    uint8_t d23_L = 0;
+    float d23_L0 = d12_L + 2 * h_L;
+    if (d23_L0 > d12_L && d23_L0 < 37.5) // 教材表5.2
+        d23_L = round_to_nearest(d23_L0, 2);
+
+    uint8_t d34_L, d34_L0;
+    d34_L0 = d23_L + 2 * h_L;
+    if (d34_L0 > 30 && d34_L0 <= 35)
+        d34_L = 35;
+    else if (d34_L0 > 35 && d34_L0 <= 40)
+        d34_L = 40;
+
+    Bearing_Param_t bearing_Low = get_bearing_param(d34_L);
+
+    float d45_L0 = d34_L + 2 * h_L;
+    float d45_L = round_to_nearest(d45_L0, 2);
+    /*
+    if (d45_L0 > 37 && d45_L0 < 40)
+        d45_L = 40;
+    else if (d45_L0 > 40 && d45_L0 < 42)
+        d45_L = 42;
+    else if (d45_L0 > 42 && d45_L0 < 45)
+        d45_L = 45;
+       */
+    float d56_L0 = d45_L + 2 * h_L;
+    float d56_L = round_to_nearest(d56_L0, 2);
+    float d67_L = d34_L;
+    /*
+   const uint8_t L_B = 25; // 讲义的图上有25mm
+   const uint8_t W_V = 50; // 讲义的带轮宽50mm*/
+    // 联轴器选择p154的LX2 Y型 联轴器，轴孔直径32，轴孔长度82
+    const int L_of_lianzhou = 82;
+    const int d_of_lianzhou = 32;
+    // ---- 低速轴长度设计----
+    float L1_L = L_of_lianzhou - 2;
+    float L2_0L = L_B + e + m0_0;
+    float L2_L = L2_0L;
+    if (round(L2_0L) < L2_0L)
+        L2_L = round(L2_0L) + 1;
+    else
+        L2_L = round(L2_0L);
+    float L3_L = bearing_Low.B + Delta3 + Delta2 + 3;
+    float L4_L = B2 - 3; // 用齿轮宽度减去2~3
+    float L5_L = 6;
+    float L6_L = 10;
+    float L7_L = bearing_Low.B;
+
+    // ---- 联轴器校核 ----
+    const float K_A_lianzhou = 1.3;
+    float T_ca = K_A_lianzhou * T_ii;
+
+#if DEBUG_FLG
+    printf("----低速轴直径设计----\n");
+    printf("取轴肩h=1.2\n");
+    printf("按扭矩估算最小直径为dmin：%.2fmm, 取整为d1: %d mm\n", d0_L0, d0_L);
+    printf("计算得d2：%.2f mm, 取整为d2: %d mm\n", d23_L0, d23_L);
+    printf("计算得d3：%d mm, 结合轴承选型应取d3: %d mm\n", d34_L0, d34_L);
+    printf("计算得d4：%.2f mm, 取整为d4: %.2f mm\n", d45_L0, d45_L);
+    printf("计算得d5：%.2f mm, 取整为d5: %.2f mm\n", d56_L0, d56_L);
+    printf("计算得d6和d3相同，为%.2f mm\n", d67_L);
+    printf("轴承选型: %s, 内径:%d, 外径%d, 宽度:%d\n", bearing_Low.name, bearing_Low.d, bearing_Low.D, bearing_Low.B);
+    printf("以轴径30为例, 联轴器选择p154的LX2 Y型 联轴器，轴孔直径32，轴孔长度82\n");
+    printf("第一段长L1: %.2f\n", L1_L);
+    printf("第二段长L2: %.2f\n", L2_L);
+    printf("第三段长L3: %.2f\n", L3_L);
+    printf("第四段长L4: %.2f\n", L4_L);
+    printf("第五段长L5: %.2f\n", L5_L);
+    printf("第六段长L6: %.2f\n", L6_L);
+    printf("第七段长L7: %.2f\n", L7_L);
+    printf("----联轴器校核----\n");
+    printf("查表得KA = 1.3, 则转矩Tca = %.2f N·mm\n", T_ca);
+    printf("以轴径30为例, 然后查表去看LX2型联轴器的许用转矩560N·m, 最大转速6400r/min, 包满足要求的\n");
+    printf("\n");
+#endif
+
+    float D2_H = bearing_High.D + 5.0 * d3_3;
+    float D2_L = bearing_Low.D + 5.0 * d3_3;
+    printf("----补充箱体设计----\n");
+    printf("高速轴的轴承端盖外径为%.2f, 低速轴的轴承端盖外径为%.2f\n", D2_H, D2_L);
     // char input;
     // printf("按Q键退出程序...\n");
     // while (1)
     // {
     //     printf("\r等待输入... (按Q退出) ");
     //     fflush(stdout);
-
     //     if (scanf("%c", &input))
     //         if (input == 'q' || input == 'Q')
     //             break;

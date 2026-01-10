@@ -19,8 +19,18 @@ typedef struct
     int D;      // 轴承外径
     int B;      // 轴承宽度
     char *name; // 轴承名称
+    float Cr; // 基本额定动载荷
+    float C0r; // 额定静载荷
 } Bearing_Param_t;
 
+typedef struct
+{
+    int b;
+    int h;
+    int L;
+} pingjian_t;
+
+pingjian_t pingjian_param(float d12);
 float find_closest_endpoint(float a, float b, float x);
 float find_closest_in_array_range(float arr[], int size, float x, int *index);
 int round_upper(float value_abs);

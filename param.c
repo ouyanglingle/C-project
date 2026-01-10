@@ -180,13 +180,13 @@ Motor_Param_t get_nw_param(float P_w, int id)
 }
 
 Bearing_Param_t bearings_list[] = {
-    {20, 47, 14, "6204"},
-    {25, 52, 15, "6205"},
-    {30, 62, 16, "6206"},
-    {35, 72, 17, "6207"},
-    {40, 80, 18, "6208"},
-    {45, 85, 19, "6209"},
-    {50, 90, 20, "6210"},
+    {20, 47, 14, "6204", 12.8, 6.65},
+    {25, 52, 15, "6205", 14.0, 7.88},
+    {30, 62, 16, "6206", 19.5, 11.5},
+    {35, 72, 17, "6207", 25.5, 15.2},
+    {40, 80, 18, "6208", 29.5, 18.0},
+    {45, 85, 19, "6209", 31.5, 20.5},
+    {50, 90, 20, "6210", 35.0, 23.2},
 };
 
 Bearing_Param_t get_bearing_param(int d)
@@ -257,4 +257,39 @@ void bending_fatigue_strength_check(float T_i, float K_Ht, float B2, float m, fl
     printf("\n");
 }
 
-/// @brief 轴的
+pingjian_t pingjian_param(float d12)
+{
+    pingjian_t pingjian_H = {0};
+    if (d12 > 17 && d12 < 22.1)
+    {
+        pingjian_H.b = 6;
+        pingjian_H.h = 6;
+        pingjian_H.L = -1;
+    }
+    else if (d12 > 22 && d12 < 30.1)
+    {
+        pingjian_H.b = 8;
+        pingjian_H.h = 7;
+        pingjian_H.L = -1;
+    }
+    else if (d12 > 30 && d12 < 38.1)
+    {
+        pingjian_H.b = 10;
+        pingjian_H.h = 8;
+        pingjian_H.L = -1;
+    }
+    else if (d12 > 38 && d12 < 44.1)
+    {
+        pingjian_H.b = 12;
+        pingjian_H.h = 8;
+        pingjian_H.L = -1;
+    }
+    else if (d12 > 44 && d12 < 50.1)
+    {
+        pingjian_H.b = 14;
+        pingjian_H.h = 9;
+        pingjian_H.L = -1;
+    }
+
+    return pingjian_H;
+}
