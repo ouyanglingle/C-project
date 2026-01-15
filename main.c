@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     find_closest_in_array_range(alpha_v_Select, sizeof(alpha_v_Select), alpha_v, &alpha_v_index); // 查表选取包角修正系数的索引
     float K_a_actual = K_a_A[alpha_v_index];                                                      // 通过索引包角修正系数
     float z_v0 = P_ca / ((P0_actual + delta_P0) * K_a_actual * Kl_A[index_A]);                    // 初步计算V带根数Z
-    int z_v_actual = round_upper(z_v0);                                                           // 最终upper取整为V带根数Z
+    int z_v_actual = round(z_v0);                                                           // 最终upper取整为V带根数Z
     const float q_v = 0.105f;                                                                     // A型V带的单位长度质量kg/m
     float F_v0 = (500 * P_ca / (z_v_actual * V_v)) * ((2.5 / K_a_actual) - 1) + q_v * V_v * V_v;  // 单根V带的初拉力计算
     float F_Q = 2 * z_v_actual * F_v0 * sin(alpha_v / 2 * PI / 180);                              // 惊天压轴力
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     printf("查表选取基本额定功率P0_A: %.3f kW, 索引为%d\n", P0_actual, index_P0 + 1);
     printf("(本条记录可忽略)计算得V带传动比i_v: %.3f, 误差在5%% 之内，故允许\n", i_v_actual);
     printf("查表选取V带基本额定功率增量delta_P0: %.3f kW, 索引为%d\n", delta_P0, delta_P0_index + 1);
-    printf("查表选取当包角为 %.2f 时的包角修正系数K_a: %.3f, 索引为%d\n", alpha_v, K_a_actual, alpha_v_index + 1);
+    printf("查表选取当包角为 %.2f 时的包角修正系数K_a: %.3f, 索引为%d, K_L为%.2f\n", alpha_v, K_a_actual, alpha_v_index + 1, Kl_A[index_A]);
     printf("初步计算得V带根数z: %.3f, 最终upper取整为 %d \n", z_v0, z_v_actual);
     printf("A型V带的单位长度质量 %.2f kg/m", q_v);
     printf("单根V带的初拉力F_v: %.3f N\n", F_v0);

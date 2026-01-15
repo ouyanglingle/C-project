@@ -4,7 +4,7 @@
 #define DEBUG_FLG 1
 #define PI 3.1415926535897932384626433832795f
 #define INNER_I1 4.0f // 默认齿轮传动比为4，参数不合理改
-#define MOTOR_MODE 1  // 0表示1000电机，1表示1500电机
+#define MOTOR_MODE 0  // 0表示1000电机，1表示1500电机
 
 typedef struct
 {
